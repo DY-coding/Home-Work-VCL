@@ -26,7 +26,6 @@ void update_days_to_event(void);
 
 #pragma hdrstop
 
-
 #include "Unit4.h"
 #include "Unit3.h"
 #include "Unit1.h"
@@ -45,16 +44,14 @@ void reload_icon();
 UnicodeString date_RuToEng(UnicodeString);
 UnicodeString tooltipStr(int);
 
-//TIcon *new_icon_gl =  new TIcon();
 //---------------------------------------------------------------------------
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
-	int tmp;
+   int TableHeight;
 
  // Устанавливаем обработчик сообщений приложения
  Application->OnMessage = AppMessage;
-
 
  p_list[0] = new TStringList;
  p_list[1] = new TStringList;
@@ -119,17 +116,13 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	StringGrid1->Cells[2][i+1] = IntToStr(diff);
  }
 
- tmp = StringGrid1->DefaultRowHeight +
+ TableHeight = StringGrid1->DefaultRowHeight +
 						StringGrid1->RowHeights[0] * table_count + 10 + table_count*2;
 
- Button1->Left = StringGrid1->Left;
- Button2->Left = Button1->Left + Button1->Width+10;
- Button1->Top  = StringGrid1->Top + tmp;
- Button2->Top  = StringGrid1->Top + tmp;
- Form1->Height = tmp + Button1->Height + 18;
+  Form1->Height = TableHeight + 18;
 
 
-  StringGrid1->Height = tmp;
+  StringGrid1->Height = TableHeight;
 
   StringGrid1->ColWidths[0] = 45;
   StringGrid1->ColWidths[1] = 295;
@@ -138,15 +131,15 @@ __fastcall TForm1::TForm1(TComponent* Owner)
   StringGrid1->ColWidths[4] = 100;
 
   ButtonSave->Enabled = false;
-  ButtonSave->Top = Button3->Top;
-  ButtonSave->Height = Button3->Height;
+  ButtonSave->Top = ButtonAdd->Top;
+  ButtonSave->Height = ButtonAdd->Height;
   ButtonSave->Width = StringGrid1->ColWidths[4];
   ButtonSave->Left = StringGrid1->Width - ButtonSave->Width-3;
 
 
    reload_icon();
 	try{
-	    /// разные значки для дебага и релиза
+		/// разные значки для дебага и релиза
 		#ifdef _DEBUG
 				Application->Icon->Handle = LoadIcon(NULL, IDI_WARNING);
 		#else
@@ -252,18 +245,6 @@ void __fastcall TForm1::StringGrid1DrawCell(TObject *Sender, System::LongInt ACo
 		Grid->Canvas->TextRect(Rect, Rect.Left + (Rect.Width() - Grid->Canvas->TextWidth(Text)) /2, Rect.Top+2, Text);
 	}
 
-   /**тултип**/
-   if(ACol == 2 && ARow){
-		if(ARow == 1)   tool_tip = std::numeric_limits<int>::max();
-		if(StrToInt(Text) < tool_tip) tool_tip = StrToInt(Text);
-
-		TrayIcon1->Hint = tooltipStr(tool_tip);
-
-   }
-
-   reload_icon();
-
-
 }
 //---------------------------------------------------------------------------
 UnicodeString __fastcall tooltipStr(int days){
@@ -279,7 +260,7 @@ UnicodeString __fastcall tooltipStr(int days){
 
    if(days>0)   return "До ближайшего события " + IntToStr(days) + inflection;
    else if(!days)   return "Ближайшее событие сегодня.";
-   else if(days<0) return "Событие просрочено на " + IntToStr((-1)*days) + inflection;
+   else return "Событие просрочено на " + IntToStr((-1)*days) + inflection;
 
 
 }
@@ -311,11 +292,15 @@ void __fastcall TForm1::StringGrid1Click(TObject *Sender)
 			StringGrid1->Enabled = false;
 			Form3->ShowModal();
 			StringGrid1->Enabled = true;
+
+			Form1->UpdateTrayStatus();
   }
   if(table.X == 4 && !block_click){
 			StringGrid1->Enabled = false;
 			Form4->ShowModal();
 			StringGrid1->Enabled = true;
+
+			Form1->UpdateTrayStatus();
   }
 
 
@@ -338,65 +323,6 @@ UnicodeString date_RuToEng(UnicodeString s){
    return return_s;
 }
 
-void __fastcall TForm1::Button1Click(TObject *Sender)
-{
-  table_count++;
-
-  p_list[0]->Add(" ");
-  p_list[1]->Add(FormatDateTime("dd.mm.yyyy", Date()+14));
-  p_list[2]->Add("2 недели");
-
-  StringGrid1->RowCount++;
-
-  StringGrid1->Cells[0][table_count] = table_count;
-  StringGrid1->Cells[1][table_count] = p_list[0]->Strings[table_count-1];
-  StringGrid1->Cells[2][table_count] = "14";
-  StringGrid1->Cells[3][table_count] = p_list[1]->Strings[table_count-1];
-  StringGrid1->Cells[4][table_count] = p_list[2]->Strings[table_count-1];
-
-
-  StringGrid1->Height = StringGrid1->DefaultRowHeight +
-						StringGrid1->RowHeights[0] * table_count + 10 + table_count*2;
-
- Button1->Left = StringGrid1->Left;
- Button2->Left = Button1->Left + Button1->Width+10;
- Button1->Top  = StringGrid1->Top + StringGrid1->Height;
- Button2->Top  = StringGrid1->Top + StringGrid1->Height;
-  Form1->Height = StringGrid1->Height + Button1->Height + 60;
-
-
- POINT cur;
- GetCursorPos(&cur);
- SetCursorPos(cur.x,cur.y+32);
-
- }
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::Button2Click(TObject *Sender)
-{
- table_count--;
-
- p_list[0]->Delete(table_count);
- p_list[1]->Delete(table_count);
- p_list[2]->Delete(table_count);
-
-  StringGrid1->RowCount--;
-
-	StringGrid1->Height = StringGrid1->DefaultRowHeight +
-						StringGrid1->RowHeights[0] * table_count + 10 + table_count*2;
-
- Button1->Left = StringGrid1->Left;
- Button2->Left = Button1->Left + Button1->Width+10;
- Button1->Top  = StringGrid1->Top + StringGrid1->Height;
- Button2->Top  = StringGrid1->Top + StringGrid1->Height;
-
- Form1->Height = StringGrid1->Height + Button1->Height + 60;
-
-
- POINT cur;
- GetCursorPos(&cur);
- SetCursorPos(cur.x, cur.y-32);
-}
 //---------------------------------------------------------------------------
 
 
@@ -551,7 +477,7 @@ else if(mode == Mode::FROM_FILES){
 
 //---------------------------------------------------------------------------
 }
-void __fastcall TForm1::Button3Click(TObject *Sender)
+void __fastcall TForm1::ButtonAddClick(TObject *Sender)
 {
   ButtonSave->Enabled = true;
 
@@ -563,7 +489,7 @@ void __fastcall TForm1::Button3Click(TObject *Sender)
 
   StringGrid1->Height = StringGrid1->DefaultRowHeight +
 						StringGrid1->RowHeights[0] * table_count + 10 + table_count*2;
-  Form1->Height = StringGrid1->Height + Button1->Height + 18;
+  Form1->Height = StringGrid1->Height + 18;
 
   StringGrid1->RowCount++;
 
@@ -574,26 +500,7 @@ void __fastcall TForm1::Button3Click(TObject *Sender)
   StringGrid1->Cells[4][table_count] = p_list[2]->Strings[table_count-1];
 
 
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::Button4Click(TObject *Sender)
-{
- if(!table_count) return;
-
- table_count--;
-
- p_list[0]->Delete(table_count);
- p_list[1]->Delete(table_count);
- p_list[2]->Delete(table_count);
-
- StringGrid1->RowCount--;
-
- StringGrid1->Height = StringGrid1->DefaultRowHeight +
-						StringGrid1->RowHeights[0] * table_count + 10 + table_count*2;
-
- Form1->Height = StringGrid1->Height + Button1->Height + 20;
-
+  Form1->UpdateTrayStatus();
 
 }
 //---------------------------------------------------------------------------
@@ -669,10 +576,10 @@ void __fastcall TForm1::Delete1Click(TObject *Sender)
 
  StringGrid1->Height = StringGrid1->DefaultRowHeight +
 						StringGrid1->RowHeights[0] * table_count + 10 + table_count*2;
- Form1->Height = StringGrid1->Height + Button1->Height + 18;
+ Form1->Height = StringGrid1->Height + 18;
 
 
-
+ Form1->UpdateTrayStatus();
 }
 
 //---------------------------------------------------------------------------
@@ -701,7 +608,7 @@ void update_days_to_event(void){
 			int diff = (int)StrToDate(date_RuToEng(p_list[1]->Strings[i])) - (int)Date();
 			Form1->StringGrid1->Cells[2][i+1] = IntToStr(diff);
 	}
-	Form1->StringGrid1->Repaint();
+	if(Form1->Visible) Form1->StringGrid1->Repaint();
 
 }
 
@@ -709,6 +616,8 @@ void update_days_to_event(void){
 void __fastcall TForm1::Update_TimerTimer(TObject *Sender)
 {
 	 update_days_to_event();
+	 Form1->UpdateTrayStatus();
+	 reload_icon();
 }
 //---------------------------------------------------------------------------
 
@@ -739,5 +648,28 @@ void __fastcall TForm1::WMQueryEndSession(TWMQueryEndSession &Message){
 
 	SavingData();
 	Message.Result = true;
+
+}
+
+//-------------------------------------------------------------------
+// обновление значка трея и его тултипа
+void __fastcall TForm1::UpdateTrayStatus(){
+
+	int min_diff = std::numeric_limits<int>::max();
+
+	for(int j = 1; j < StringGrid1->RowCount; j++){
+
+		try{
+			int diff = StrToInt(StringGrid1->Cells[2][j]);
+			if(diff < min_diff)
+					min_diff = diff;
+		}
+		catch(...){
+				 // учет ошибки пустой ячейки и не-числа в ней
+		}
+	}
+
+	TrayIcon1->Hint = tooltipStr(min_diff);
+	reload_icon();
 
 }

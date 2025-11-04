@@ -3,3 +3,4 @@ __recovery/
 Win64x/
 *.cbproj.local
 *.vlb
+*.todo

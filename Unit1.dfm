@@ -54,46 +54,15 @@ object Form1: TForm1
       20
       20)
   end
-  object Button1: TButton
-    Left = 192
-    Top = 224
-    Width = 32
-    Height = 25
-    Caption = '+'
-    TabOrder = 1
-    Visible = False
-    OnClick = Button1Click
-  end
-  object Button2: TButton
-    Left = 240
-    Top = 224
-    Width = 32
-    Height = 25
-    Caption = '-'
-    TabOrder = 2
-    Visible = False
-    OnClick = Button2Click
-  end
-  object Button3: TButton
+  object ButtonAdd: TButton
     Left = 1
     Top = 1
     Width = 30
     Height = 20
     Caption = '+'
-    TabOrder = 3
+    TabOrder = 1
     TabStop = False
-    OnClick = Button3Click
-  end
-  object Button4: TButton
-    Left = 32
-    Top = 1
-    Width = 30
-    Height = 20
-    Caption = '-'
-    TabOrder = 4
-    TabStop = False
-    Visible = False
-    OnClick = Button4Click
+    OnClick = ButtonAddClick
   end
   object ButtonSave: TButton
     Left = 280
@@ -107,7 +76,7 @@ object Form1: TForm1
     Font.Name = 'Segoe UI'
     Font.Style = []
     ParentFont = False
-    TabOrder = 5
+    TabOrder = 2
     TabStop = False
     OnClick = ButtonSaveClick
   end

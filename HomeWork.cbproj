@@ -6,7 +6,7 @@
         <MainSource>HomeWork.cpp</MainSource>
         <AppType>Application</AppType>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win64x</Platform>
         <ProjectName Condition="'$(ProjectName)'==''">HomeWork</ProjectName>
         <TargetedPlatforms>1048579</TargetedPlatforms>
@@ -189,6 +189,7 @@
         <ResFiles Include="Homework.res">
             <BuildOrder>6</BuildOrder>
         </ResFiles>
+        <None Include="HomeWork.todo"/>
         <PCHCompile Include="HomeWorkPCH1.h">
             <BuildOrder>1</BuildOrder>
             <PCH>true</PCH>
@@ -325,13 +326,19 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName=".\Win64x\Debug\HomeWork.pdb" Configuration="Debug" Class="DebugSymbols">
+                <DeployFile LocalName=".\Win64x\Release\HomeWork.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win64x">
-                        <RemoteName>HomeWork.pdb</RemoteName>
+                        <RemoteName>HomeWork.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="Homework.res" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win64x">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Homework.res" Configuration="Release" Class="ProjectFile">
                     <Platform Name="Win64x">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>

@@ -18,14 +18,11 @@ class TForm1 : public TForm
 {
 __published:	// IDE-managed Components
 	TStringGrid *StringGrid1;
-	TButton *Button1;
-	TButton *Button2;
 	TTrayIcon *TrayIcon1;
 	TPopupMenu *PopupMenu1;
 	TMenuItem *Close1;
 	TMenuItem *Show1;
-	TButton *Button3;
-	TButton *Button4;
+	TButton *ButtonAdd;
 	TPopupMenu *PopupMenu2;
 	TMenuItem *Delete1;
 	TTimer *Timer2;
@@ -35,8 +32,6 @@ __published:	// IDE-managed Components
 		  TRect &Rect, TGridDrawState State);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 	void __fastcall StringGrid1Click(TObject *Sender);
-	void __fastcall Button1Click(TObject *Sender);
-	void __fastcall Button2Click(TObject *Sender);
 	void __fastcall TrayIcon1MouseUp(TObject *Sender, TMouseButton Button, TShiftState Shift,
 		  int X, int Y);
 	void __fastcall Close1Click(TObject *Sender);
@@ -44,8 +39,7 @@ __published:	// IDE-managed Components
 	void __fastcall Show1Click(TObject *Sender);
 	void __fastcall PopupMenu1Popup(TObject *Sender);
 	void __fastcall TrayIcon1DblClick(TObject *Sender);
-	void __fastcall Button3Click(TObject *Sender);
-	void __fastcall Button4Click(TObject *Sender);
+	void __fastcall ButtonAddClick(TObject *Sender);
 	void __fastcall StringGrid1MouseUp(TObject *Sender, TMouseButton Button, TShiftState Shift,
           int X, int Y);
 	void __fastcall PopupMenu2Close(TObject *Sender);
@@ -55,6 +49,7 @@ __published:	// IDE-managed Components
 	void __fastcall FormShow(TObject *Sender);
 	void __fastcall Update_TimerTimer(TObject *Sender);
 	void __fastcall ButtonSaveClick(TObject *Sender);
+	void __fastcall UpdateTrayStatus(void);
 
 private:	// User declarations
 
