@@ -1,9 +1,4 @@
 /// THIS IS FILE UNIT1.CPP
-
-int selectedRow = -1;
-bool block_click = false;
-int tool_tip;
-void update_days_to_event(void);
 //---------------------------------------------------------------------------
 #include <System.SysUtils.hpp>
 #include <System.IOUtils.hpp>
@@ -40,6 +35,18 @@ TStringList *p_list[3];
 int table_count;
 int alarms();
 
+struct Task{
+	UnicodeString Name;
+	UnicodeString Date;
+	UnicodeString Weeks;
+};
+std::vector<Task> task;
+
+int selectedRow = -1;
+bool block_click = false;
+int tool_tip;
+void update_days_to_event(void);
+
 void reload_icon();
 UnicodeString date_RuToEng(UnicodeString);
 UnicodeString tooltipStr(int);
@@ -48,7 +55,7 @@ UnicodeString tooltipStr(int);
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
-   int TableHeight;
+   int TableHeight = 0;
 
  // Устанавливаем обработчик сообщений приложения
  Application->OnMessage = AppMessage;
@@ -88,7 +95,6 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 		 }
    }
 
-
    UnicodeString source, dest;
    source = "wh" + IntToStr(n+1) + ".dat";
    dest   = "wh" + IntToStr(n+1) + ".bac";
@@ -96,33 +102,31 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	if(!CopyFile(source.c_str(), dest.c_str(), false))
 	   ShowMessage("Error " + IntToStr(n+1) + "06. Creating ");
 
-}
-
- if(p_list[0]->Count > p_list[1]->Count)
-		table_count = p_list[0]->Count;
- else   table_count = p_list[1]->Count;
- StringGrid1->RowCount = table_count + 1;
-
-
- for(int i=0; i<table_count; i++){
-	StringGrid1->Cells[0][i+1] = i+1;
-	StringGrid1->Cells[1][i+1] = p_list[0]->Strings[i];
-	StringGrid1->Cells[3][i+1] = p_list[1]->Strings[i];
-	StringGrid1->Cells[4][i+1] = p_list[2]->Strings[i];
-
-	int diff=0;
-	diff = (int)StrToDate(date_RuToEng(p_list[1]->Strings[i])) - (int)Date();
-
-	StringGrid1->Cells[2][i+1] = IntToStr(diff);
  }
 
- TableHeight = StringGrid1->DefaultRowHeight +
-						StringGrid1->RowHeights[0] * table_count + 10 + table_count*2;
 
-  Form1->Height = TableHeight + 18;
+ table_count = p_list[0]->Count;
+ StringGrid1->RowCount  = table_count + 1;
+ TableHeight += StringGrid1->RowHeights[0]; // заголовок
 
+	for(int i=0; i<table_count; i++){
 
+		StringGrid1->Cells[0][i+1] = i+1;
+		StringGrid1->Cells[1][i+1] = p_list[0]->Strings[i];
+		StringGrid1->Cells[3][i+1] = p_list[1]->Strings[i];
+		StringGrid1->Cells[4][i+1] = p_list[2]->Strings[i];
+
+		int	diff=0;
+		diff = (int)StrToDate(date_RuToEng(p_list[1]->Strings[i])) - (int)Date();
+		StringGrid1->Cells[2][i+1] = IntToStr(diff);
+
+		TableHeight += (StringGrid1->RowHeights[i+1] + StringGrid1->GridLineWidth*2);
+	}
+
+  TableHeight += StringGrid1->Margins->Bottom;
   StringGrid1->Height = TableHeight;
+  Form1->Height = TableHeight +  (Form1->Height - Form1->ClientHeight);
+
 
   StringGrid1->ColWidths[0] = 45;
   StringGrid1->ColWidths[1] = 295;
@@ -487,9 +491,7 @@ void __fastcall TForm1::ButtonAddClick(TObject *Sender)
   p_list[1]->Add(FormatDateTime("dd.mm.yyyy", Date()+14));
   p_list[2]->Add("2 недели");
 
-  StringGrid1->Height = StringGrid1->DefaultRowHeight +
-						StringGrid1->RowHeights[0] * table_count + 10 + table_count*2;
-  Form1->Height = StringGrid1->Height + 18;
+
 
   StringGrid1->RowCount++;
 
@@ -499,9 +501,12 @@ void __fastcall TForm1::ButtonAddClick(TObject *Sender)
   StringGrid1->Cells[3][table_count] = p_list[1]->Strings[table_count-1];
   StringGrid1->Cells[4][table_count] = p_list[2]->Strings[table_count-1];
 
+  int delta = StringGrid1->RowHeights[table_count+1] + StringGrid1->GridLineWidth*2;
+  StringGrid1->Height += delta;
+  Form1->Height += delta;
+
 
   Form1->UpdateTrayStatus();
-
 }
 //---------------------------------------------------------------------------
 
@@ -574,9 +579,9 @@ void __fastcall TForm1::Delete1Click(TObject *Sender)
 
   table_count--;
 
- StringGrid1->Height = StringGrid1->DefaultRowHeight +
-						StringGrid1->RowHeights[0] * table_count + 10 + table_count*2;
- Form1->Height = StringGrid1->Height + 18;
+  int delta = StringGrid1->RowHeights[table_count+1] + StringGrid1->GridLineWidth*2;
+  StringGrid1->Height -= delta;
+  Form1->Height -= delta;
 
 
  Form1->UpdateTrayStatus();
@@ -588,6 +593,7 @@ void __fastcall TForm1::FormShow(TObject *Sender)
 {
 		Form1->WindowState = wsNormal;
 		Form1->Show();
+
 }
 
 //---------------------------------------------------------------------------
@@ -639,6 +645,13 @@ void __fastcall TForm1::SavingData(){
 				  ShowMessage("Error " + IntToStr(j+1) +"02.Saving" + e.Message);
 	}
  }
+
+
+ int size = p_list[0]->Count;
+
+
+
+
 
 }
 

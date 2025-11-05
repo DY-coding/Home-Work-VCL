@@ -27,7 +27,8 @@ object Form1: TForm1
     DefaultColWidth = 30
     DefaultRowHeight = 20
     DefaultDrawing = False
-    RowCount = 8
+    RowCount = 2
+    FixedRows = 0
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -16
@@ -45,12 +46,6 @@ object Form1: TForm1
       30
       30)
     RowHeights = (
-      20
-      20
-      20
-      20
-      20
-      20
       20
       20)
   end
