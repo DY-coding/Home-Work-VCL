@@ -13,6 +13,14 @@
 #include <Vcl.ExtCtrls.hpp>
 #include <Vcl.Menus.hpp>
 #include <Grids.hpp>
+
+
+struct Task{
+	UnicodeString Name;
+	UnicodeString Date;
+	UnicodeString Weeks;
+};
+
 //---------------------------------------------------------------------------
 class TForm1 : public TForm
 {

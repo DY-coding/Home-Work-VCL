@@ -11,7 +11,7 @@
 #pragma resource "*.dfm"
 TForm4 *Form4;
 extern TGridCoord table;
-extern TStringList *p_list[3];
+extern std::vector<Task> tasks;
 //---------------------------------------------------------------------------
 __fastcall TForm4::TForm4(TComponent* Owner)
 	: TForm(Owner)
@@ -37,9 +37,7 @@ void __fastcall TForm4::ScrollBar1Change(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TForm4::FormShow(TObject *Sender)
 {
-
-	int j = StrToInt(p_list[2]->Strings[table.Y-1].SubString(1,p_list[2]->Strings[table.Y-1].Pos(" ")-1));
-
+	int j = StrToInt(tasks[table.Y-1].Weeks.SubString(1, tasks[table.Y-1].Weeks.Pos(" ")-1));
 	ScrollBar1->Position = j;
 	Panel1->Caption = format_weeks(j);
 
@@ -52,11 +50,10 @@ void __fastcall TForm4::Button2Click(TObject *Sender)
 	int j = ScrollBar1->Position;
 	UnicodeString s = format_weeks(j);
 
-	if(s != p_list[2]->Strings[table.Y-1]){
+	if(s != tasks[table.Y-1].Weeks){
 
 		Form1->ButtonSave->Enabled = true;
-
-		p_list[2]->Strings[table.Y-1] = s;
+        tasks[table.Y-1].Weeks = s;
 		Form1->StringGrid1->Cells[4][table.Y] = s;
 	}
 
@@ -74,11 +71,9 @@ void __fastcall TForm4::Button1Click(TObject *Sender)
 	int j = ScrollBar1->Position;
 	UnicodeString s = format_weeks(j);
 
-	if(s != p_list[2]->Strings[table.Y-1]){
-
+	if( s != tasks[table.Y-1].Weeks){
 		Form1->ButtonSave->Enabled = true;
-
-		p_list[2]->Strings[table.Y-1] = s;
+		tasks[table.Y-1].Weeks = s;
 		Form1->StringGrid1->Cells[4][table.Y] = s;
 	}
 

@@ -2,9 +2,11 @@
 //---------------------------------------------------------------------------
 #include <System.SysUtils.hpp>
 #include <System.IOUtils.hpp>
+#include <System.JSON.BSON.hpp>
 
 #define WM_RESTORE_WINDOW WM_USER + 1
 
+#include <memory>
 #include <winbase.h>
 #include <algorithm>
 #include <stdlib.h>
@@ -31,16 +33,10 @@
 TForm1 *Form1;
 
 TGridCoord table = {1,1};
-TStringList *p_list[3];
 int table_count;
 int alarms();
 
-struct Task{
-	UnicodeString Name;
-	UnicodeString Date;
-	UnicodeString Weeks;
-};
-std::vector<Task> task;
+std::vector<Task> tasks;
 
 int selectedRow = -1;
 bool block_click = false;
@@ -51,73 +47,83 @@ void reload_icon();
 UnicodeString date_RuToEng(UnicodeString);
 UnicodeString tooltipStr(int);
 
+
 //---------------------------------------------------------------------------
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
    int TableHeight = 0;
 
- // Устанавливаем обработчик сообщений приложения
- Application->OnMessage = AppMessage;
+   // Устанавливаем обработчик сообщений приложения
+   Application->OnMessage = AppMessage;
 
- p_list[0] = new TStringList;
- p_list[1] = new TStringList;
- p_list[2] = new TStringList;
+   tasks.clear();
+   UnicodeString json_txt;
+   if(TFile::Exists("data.json")){
 
+		json_txt = TFile::ReadAllText("data.json");
 
+		// парсинг
+		TJSONValue* json_root = nullptr;
+		json_root = TJSONObject::ParseJSONValue(json_txt);
 
- for(int n=0; n<3; n++){
-
-   if(TFile::Exists("wh" + IntToStr(n+1) + ".dat")){
-		try {
-			p_list[n]->LoadFromFile("wh" + IntToStr(n+1) + ".dat");
+		// проверка на массив json
+		TJSONArray* json_array = dynamic_cast<TJSONArray*>(json_root);
+		if(!json_array){
+			ShowMessage("Error data.json - 05.Parsing");
+			return;
 		}
-		catch (Exception&e){
-			ShowMessage("Error " + IntToStr(n+1) + "05.Reading" + e.Message);
+
+
+		for(int j=0; j<json_array->Count; j++){
+
+			TJSONObject* json_object = dynamic_cast<TJSONObject*>(json_array->Get(j));
+			if(json_object){
+				Task newTask;
+
+				TJSONString* nameStr = dynamic_cast<TJSONString*>(json_object->FindValue("Name"));
+				if(nameStr) newTask.Name = nameStr->Value();
+				TJSONString* dateStr = dynamic_cast<TJSONString*>(json_object->FindValue("Date"));
+				if(dateStr) newTask.Date = dateStr->Value();
+				TJSONString* weeksStr = dynamic_cast<TJSONString*>(json_object->FindValue("Weeks"));
+				if(weeksStr) newTask.Weeks = weeksStr->Value();
+
+				tasks.push_back(newTask);
+			}
 		}
+		if(json_root) delete json_root;
+
    }
    else{
- //	   ShowMessage("FIle(s) is not exist");
-		 if(n==0){
-		 p_list[n]->Add("Задание 1");
-		 p_list[n]->Add("Задание 2");
-		 p_list[n]->Add("Задание 3");
-		 }
-		 if(n==1){
-		 p_list[n]->Add(FormatDateTime("dd.mm.yyyy", Date()));
-		 p_list[n]->Add(FormatDateTime("dd.mm.yyyy", Date()+3));
-		 p_list[n]->Add(FormatDateTime("dd.mm.yyyy", Date()-3));
-		 }
-		 if(n==2){
-		 p_list[n]->Add("1 неделя");
-		 p_list[n]->Add("2 недели");
-		 p_list[n]->Add("3 недели");
-		 }
+
+	 // образец, если данных нет
+	 for(int j=0; j<3;j++){
+		Task newTask;
+		newTask.Name = "Задание " + IntToStr(j+1);
+		newTask.Date = FormatDateTime("dd.mm.yyy", Date()+(j+2)*7);
+		newTask.Weeks= IntToStr(j+2) + " недели";
+
+		tasks.push_back(newTask);
+	 }
+
    }
 
-   UnicodeString source, dest;
-   source = "wh" + IntToStr(n+1) + ".dat";
-   dest   = "wh" + IntToStr(n+1) + ".bac";
-   if(TFile::Exists(source))
-	if(!CopyFile(source.c_str(), dest.c_str(), false))
-	   ShowMessage("Error " + IntToStr(n+1) + "06. Creating ");
-
- }
 
 
- table_count = p_list[0]->Count;
+ table_count = tasks.size();
+
  StringGrid1->RowCount  = table_count + 1;
  TableHeight += StringGrid1->RowHeights[0]; // заголовок
 
 	for(int i=0; i<table_count; i++){
 
 		StringGrid1->Cells[0][i+1] = i+1;
-		StringGrid1->Cells[1][i+1] = p_list[0]->Strings[i];
-		StringGrid1->Cells[3][i+1] = p_list[1]->Strings[i];
-		StringGrid1->Cells[4][i+1] = p_list[2]->Strings[i];
+		StringGrid1->Cells[1][i+1] = tasks[i].Name;
+		StringGrid1->Cells[3][i+1] = tasks[i].Date;
+		StringGrid1->Cells[4][i+1] = tasks[i].Weeks;
 
-		int	diff=0;
-		diff = (int)StrToDate(date_RuToEng(p_list[1]->Strings[i])) - (int)Date();
+		int diff = (int)StrToDate(date_RuToEng(tasks[i].Date)) - (int)Date();
+
 		StringGrid1->Cells[2][i+1] = IntToStr(diff);
 
 		TableHeight += (StringGrid1->RowHeights[i+1] + StringGrid1->GridLineWidth*2);
@@ -342,16 +348,8 @@ void __fastcall TForm1::TrayIcon1MouseUp(TObject *Sender, TMouseButton Button, T
 
 void __fastcall TForm1::Close1Click(TObject *Sender)
 {
-
 	SavingData();
-
-	for(int j=0; j<3; j++)
-		 if(p_list[j] != nullptr){
-			 delete  p_list[j];
-			 p_list[j] = nullptr;
-		 }
-
-    Application->Terminate();
+	Application->Terminate();
 }
 //---------------------------------------------------------------------------
 
@@ -486,20 +484,21 @@ void __fastcall TForm1::ButtonAddClick(TObject *Sender)
   ButtonSave->Enabled = true;
 
   table_count++;
-
-  p_list[0]->Add(" ");
-  p_list[1]->Add(FormatDateTime("dd.mm.yyyy", Date()+14));
-  p_list[2]->Add("2 недели");
-
+  Task newTask;
+  newTask.Name = " ";
+  newTask.Date = FormatDateTime("dd.mm.yyyy", Date()+14);
+  newTask.Weeks= "2 недели";
+  tasks.push_back(newTask);
 
 
   StringGrid1->RowCount++;
 
   StringGrid1->Cells[0][table_count] = table_count;
-  StringGrid1->Cells[1][table_count] = p_list[0]->Strings[table_count-1];
+  StringGrid1->Cells[1][table_count] = newTask.Name;
   StringGrid1->Cells[2][table_count] = "14";
-  StringGrid1->Cells[3][table_count] = p_list[1]->Strings[table_count-1];
-  StringGrid1->Cells[4][table_count] = p_list[2]->Strings[table_count-1];
+  StringGrid1->Cells[3][table_count] = newTask.Date;
+  StringGrid1->Cells[4][table_count] = newTask.Weeks;
+
 
   int delta = StringGrid1->RowHeights[table_count+1] + StringGrid1->GridLineWidth*2;
   StringGrid1->Height += delta;
@@ -565,7 +564,9 @@ void __fastcall TForm1::Delete1Click(TObject *Sender)
 
   ButtonSave->Enabled = true;
 
-  for(int j=0; j<3; j++) p_list[j]->Delete(table.Y-1);
+  auto deleteIndex = tasks.begin() + table.Y;
+  tasks.erase(deleteIndex-1);
+
 
   for(int j=table.Y; j<table_count; j++)
 	for(int g=0; g<StringGrid1->ColCount; g++)
@@ -611,7 +612,7 @@ void __fastcall TForm1::AppMessage(tagMSG &Msg, bool &Handled)
 void update_days_to_event(void){
 
 	for(int i=0; i<table_count; i++){
-			int diff = (int)StrToDate(date_RuToEng(p_list[1]->Strings[i])) - (int)Date();
+			int diff = (int)StrToDate(date_RuToEng(tasks[i].Date)) - (int)Date();
 			Form1->StringGrid1->Cells[2][i+1] = IntToStr(diff);
 	}
 	if(Form1->Visible) Form1->StringGrid1->Repaint();
@@ -636,20 +637,25 @@ void __fastcall TForm1::ButtonSaveClick(TObject *Sender)
 
 void __fastcall TForm1::SavingData(){
 
- for(int j=0; j<3; j++){
-	try{
-			p_list[j]->SaveToFile("wh" + IntToStr(j+1) + ".dat");
-			if (!TFile::Exists("wh" + IntToStr(j+1) + ".dat"))
-					ShowMessage("Error " + IntToStr(j+1) + "01.Creating");
-	} catch (Exception &e){
-				  ShowMessage("Error " + IntToStr(j+1) +"02.Saving" + e.Message);
-	}
- }
+  TJSONArray* json_array = new TJSONArray();
+  try{
+		for(const auto& item : tasks){
+			TJSONObject* json_object = new TJSONObject();
+			json_object->AddPair("Name", new TJSONString(item.Name));
+			json_object->AddPair("Date", new TJSONString(item.Date));
+			json_object->AddPair("Weeks",new TJSONString(item.Weeks));
+
+			json_array->AddElement(json_object);
+		}
+  }
+  catch(...){
+  }
+
+  UnicodeString json_txt = json_array->ToString();
+  TFile::WriteAllText("data.json", json_txt);
 
 
- int size = p_list[0]->Count;
-
-
+  delete json_array;
 
 
 

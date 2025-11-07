@@ -6,7 +6,7 @@
         <MainSource>HomeWork.cpp</MainSource>
         <AppType>Application</AppType>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win64x</Platform>
         <ProjectName Condition="'$(ProjectName)'==''">HomeWork</ProjectName>
         <TargetedPlatforms>1048579</TargetedPlatforms>

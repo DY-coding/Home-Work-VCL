@@ -11,7 +11,7 @@
 #pragma resource "*.dfm"
 TForm2 *Form2;
 extern TGridCoord table;
-extern TStringList *p_list[2];
+extern std::vector<Task> tasks;
 //---------------------------------------------------------------------------
 __fastcall TForm2::TForm2(TComponent* Owner)
 	: TForm(Owner)
@@ -30,10 +30,9 @@ void __fastcall TForm2::Edit1KeyUp(TObject *Sender, WORD &Key, TShiftState Shift
 {
 	if(Key == VK_RETURN){
 
-		if(Edit1->Text != p_list[0]->Strings[table.Y-1]){
+		if(Edit1->Text != tasks[table.Y-1].Name){
 			Form1->ButtonSave->Enabled = true;
-
-			p_list[0]->Strings[table.Y-1] = Edit1->Text;
+			tasks[table.Y-1].Name = Edit1->Text;
 			Form1->StringGrid1->Cells[1][table.Y] = Edit1->Text;
         }
 		ModalResult = mrOk;
@@ -53,8 +52,7 @@ void __fastcall TForm2::Edit1KeyUp(TObject *Sender, WORD &Key, TShiftState Shift
 
 void __fastcall TForm2::FormShow(TObject *Sender)
 {
-
- Edit1->Text = p_list[0]->Strings[table.Y-1];
+ Edit1->Text = tasks[table.Y-1].Name;
  Edit1->SetFocus();
  Edit1->SelectAll();
 }
@@ -64,10 +62,9 @@ void __fastcall TForm2::FormShow(TObject *Sender)
 void __fastcall TForm2::Button1Click(TObject *Sender)
 {
 
-		if(Edit1->Text != p_list[0]->Strings[table.Y-1]){
+		if(Edit1->Text != tasks[table.Y-1].Name){
 			Form1->ButtonSave->Enabled = true;
-
-			p_list[0]->Strings[table.Y-1] = Edit1->Text;
+			tasks[table.Y-1].Name = Edit1->Text;
 			Form1->StringGrid1->Cells[1][table.Y] = Edit1->Text;
         }
 		ModalResult = mrOk;
