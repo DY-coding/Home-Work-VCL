@@ -16,8 +16,6 @@ TForm3 *Form3;
 __fastcall TForm3::TForm3(TComponent* Owner)
 	: TForm(Owner)
 {
-   MonthCalendar1->Date = Date();
-
    Form3->Left = Form1->Left + (Form1->Width - Form3->Width)/2;
    Form3->Top  = Form1->Top  + (Form1->Height - Form3->Height)/2;
 
@@ -51,6 +49,12 @@ void __fastcall TForm3::Button_OkClick(TObject *Sender)
 
 
     Form1->StringGrid1->Repaint();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm3::FormShow(TObject *Sender)
+{
+   MonthCalendar1->Date = Date();
 }
 //---------------------------------------------------------------------------
 

@@ -16,6 +16,7 @@ __published:	// IDE-managed Components
 	TMonthCalendar *MonthCalendar1;
 	TButton *Button_Ok;
 	void __fastcall Button_OkClick(TObject *Sender);
+	void __fastcall FormShow(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TForm3(TComponent* Owner);
