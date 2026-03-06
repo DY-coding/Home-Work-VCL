@@ -61,7 +61,7 @@ void __fastcall TForm4::Button2Click(TObject *Sender)
 	Form4->Close();
 
 
-	Form3->MonthCalendar1->Date = Now() + j*7;
+	Form3->MonthCalendar1->Date = Date() + j*7;
 	Form3->ShowModal();
 }
 //---------------------------------------------------------------------------

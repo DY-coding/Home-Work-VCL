@@ -300,6 +300,7 @@ void __fastcall TForm1::StringGrid1Click(TObject *Sender)
   if(table.X == 1 && !block_click) Form2->ShowModal();
   if(table.X == 3 && !block_click){
 			StringGrid1->Enabled = false;
+            Form3->MonthCalendar1->Date = Date();
 			Form3->ShowModal();
 			StringGrid1->Enabled = true;
 

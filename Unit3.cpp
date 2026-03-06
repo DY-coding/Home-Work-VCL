@@ -52,9 +52,3 @@ void __fastcall TForm3::Button_OkClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm3::FormShow(TObject *Sender)
-{
-   MonthCalendar1->Date = Date();
-}
-//---------------------------------------------------------------------------
-
